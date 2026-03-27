@@ -2,344 +2,609 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TaskFlow — 待办清单</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>食到家 — 外卖首页</title>
   <style>
     /* ── 变量 & 重置 ── */
     :root {
-      --bg: #f0f2f5;
-      --surface: #ffffff;
-      --primary: #4f46e5;
-      --primary-light: #eef2ff;
-      --primary-dark: #3730a3;
-      --accent: #f59e0b;
-      --text: #111827;
-      --text-muted: #6b7280;
-      --border: #e5e7eb;
-      --danger: #ef4444;
-      --danger-light: #fef2f2;
-      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
-      --shadow-lg: 0 8px 32px rgba(0,0,0,.10), 0 2px 8px rgba(0,0,0,.06);
-      --radius: 14px;
+      --orange: #FF6600;
+      --orange-light: #FFF0E6;
+      --orange-dark: #E55A00;
+      --orange-glow: rgba(255,102,0,.18);
+      --text: #1a1a1a;
+      --text-muted: #999;
+      --border: #f0f0f0;
+      --card-shadow: 0 2px 12px rgba(0,0,0,.07);
+      --card-shadow-hover: 0 6px 24px rgba(0,0,0,.12);
+      --radius: 16px;
+      --radius-sm: 10px;
       --transition: .22s cubic-bezier(.4,0,.2,1);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-                   'Helvetica Neue', Arial, sans-serif;
-      background: var(--bg);
+    html, body {
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB',
+                   'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
       color: var(--text);
-      min-height: 100vh;
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ── 顶部导航 ── */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: linear-gradient(135deg, #FF6600 0%, #FF8533 100%);
+      padding: 14px 16px 12px;
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 48px 16px 80px;
-    }
-
-    /* ── 标题区 ── */
-    .header {
-      text-align: center;
-      margin-bottom: 40px;
-      animation: fadeDown .5s ease both;
-    }
-
-    .header .logo {
-      display: inline-flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 8px;
+      box-shadow: 0 2px 12px rgba(255,102,0,.25);
     }
 
-    .header .logo svg {
-      width: 36px; height: 36px;
-      color: var(--primary);
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-shrink: 0;
     }
 
-    .header h1 {
-      font-size: 28px;
+    .logo-icon {
+      width: 34px; height: 34px;
+      background: #fff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,.12);
+    }
+
+    .logo-icon svg { width: 20px; height: 20px; }
+
+    .logo-text {
+      font-size: 18px;
       font-weight: 800;
-      letter-spacing: -.5px;
-      background: linear-gradient(135deg, var(--primary), var(--accent));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: #fff;
+      letter-spacing: -0.3px;
+      text-shadow: 0 1px 3px rgba(0,0,0,.15);
     }
 
-    .header p {
-      color: var(--text-muted);
-      font-size: 14px;
-      margin-top: 4px;
-    }
+    .logo-text span { font-weight: 400; opacity: .9; }
 
-    /* ── 主容器 ── */
-    .app {
-      width: 100%;
-      max-width: 560px;
-      animation: fadeUp .6s ease both;
-    }
-
-    /* ── 输入区 ── */
-    .input-card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-
-    .input-row {
-      display: flex;
-      gap: 10px;
-      align-items: flex-end;
-    }
-
-    .input-field {
+    .search-box {
       flex: 1;
       position: relative;
     }
 
-    .input-field label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: .6px;
-      margin-bottom: 6px;
-    }
-
-    .input-field input[type="text"],
-    .input-field input[type="date"] {
+    .search-box input {
       width: 100%;
-      padding: 10px 14px;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      font-size: 15px;
-      color: var(--text);
-      background: #fafafa;
-      transition: border-color var(--transition), box-shadow var(--transition);
+      padding: 9px 14px 9px 38px;
+      border: none;
+      border-radius: 24px;
+      background: rgba(255,255,255,.22);
+      color: #fff;
+      font-size: 13.5px;
       outline: none;
-      font-family: inherit;
+      backdrop-filter: blur(8px);
+      transition: background var(--transition);
     }
 
-    .input-field input:focus {
-      border-color: var(--primary);
+    .search-box input::placeholder { color: rgba(255,255,255,.75); }
+
+    .search-box input:focus {
+      background: rgba(255,255,255,.35);
+      box-shadow: 0 0 0 2px rgba(255,255,255,.3);
+    }
+
+    .search-box .search-icon {
+      position: absolute;
+      left: 12px; top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255,255,255,.8);
+    }
+
+    .user-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
       background: #fff;
-      box-shadow: 0 0 0 3px rgba(79,70,229,.12);
-    }
-
-    .input-field input::placeholder { color: #c4c9d4; }
-
-    /* 优先级选择 */
-    .priority-group {
-      display: flex;
-      gap: 6px;
-      margin-top: 12px;
-      align-items: center;
-    }
-
-    .priority-group span {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: .6px;
-      margin-right: 2px;
-    }
-
-    .priority-btn {
-      padding: 5px 14px;
-      border-radius: 20px;
-      border: 1.5px solid var(--border);
-      background: #fafafa;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all var(--transition);
-      color: var(--text-muted);
-    }
-
-    .priority-btn:hover { border-color: var(--primary); color: var(--primary); }
-
-    .priority-btn.active-high   { background: #fef2f2; border-color: var(--danger); color: var(--danger); }
-    .priority-btn.active-medium { background: #fffbeb; border-color: var(--accent);  color: #b45309; }
-    .priority-btn.active-low    { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
-
-    .btn-add {
+      border: 2.5px solid rgba(255,255,255,.5);
+      overflow: hidden;
+      flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
-      border: none;
-      background: var(--primary);
-      color: #fff;
       cursor: pointer;
-      transition: all var(--transition);
+      transition: transform var(--transition);
+      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    }
+
+    .user-avatar:hover { transform: scale(1.08); }
+
+    .user-avatar svg { width: 18px; height: 18px; color: var(--orange); }
+
+    /* ── 地址栏 ── */
+    .address-bar {
+      background: var(--orange);
+      padding: 0 16px 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .address-bar .addr-icon {
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .address-bar .addr-icon svg { width: 14px; height: 14px; }
+
+    .address-text {
+      flex: 1;
+      font-size: 12.5px;
+      color: rgba(255,255,255,.92);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .address-text strong {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .weather-badge {
+      background: rgba(255,255,255,.18);
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 11px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 3px;
       flex-shrink: 0;
     }
 
-    .btn-add:hover {
-      background: var(--primary-dark);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(79,70,229,.35);
+    .weather-badge svg { width: 12px; height: 12px; }
+
+    /* ── Banner 轮播 ── */
+    .banner-section {
+      padding: 14px 16px 10px;
+      background: linear-gradient(180deg, var(--orange) 0%, #f5f5f5 60%);
     }
 
-    .btn-add:active { transform: translateY(0); }
-
-    /* ── 统计栏 ── */
-    .stats-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      padding: 0 2px;
-    }
-
-    .stats-bar .count {
-      font-size: 13px;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-
-    .stats-bar .filters {
-      display: flex;
-      gap: 4px;
-    }
-
-    .filter-btn {
-      padding: 4px 12px;
-      border-radius: 20px;
-      border: none;
-      background: transparent;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all var(--transition);
-    }
-
-    .filter-btn:hover { color: var(--primary); background: var(--primary-light); }
-
-    .filter-btn.active {
-      background: var(--primary);
-      color: #fff;
-    }
-
-    /* ── 任务列表 ── */
-    .task-list { display: flex; flex-direction: column; gap: 10px; }
-
-    .task-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: var(--surface);
+    .banner-container {
+      position: relative;
       border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 14px 16px;
-      transition: all var(--transition);
-      animation: slideIn .3s ease both;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(255,102,0,.25);
+    }
+
+    .banner-track {
+      display: flex;
+      transition: transform .45s cubic-bezier(.4,0,.2,1);
+      border-radius: var(--radius);
+    }
+
+    .banner-slide {
+      min-width: 100%;
+      height: 150px;
+      background: linear-gradient(135deg, #FF6600 0%, #FF9A5C 100%);
+      display: flex;
+      align-items: center;
+      padding: 20px 24px;
       position: relative;
       overflow: hidden;
     }
 
-    .task-item::before {
+    .banner-slide:nth-child(2) {
+      background: linear-gradient(135deg, #FF4444 0%, #FF8A5C 100%);
+    }
+
+    .banner-slide:nth-child(3) {
+      background: linear-gradient(135deg, #FF9933 0%, #FFCC66 100%);
+    }
+
+    .banner-slide::after {
       content: '';
       position: absolute;
-      left: 0; top: 0; bottom: 0;
-      width: 4px;
-      border-radius: 14px 0 0 14px;
-      background: var(--border);
-      transition: background var(--transition);
+      right: -30px; bottom: -30px;
+      width: 160px; height: 160px;
+      background: rgba(255,255,255,.08);
+      border-radius: 50%;
     }
 
-    .task-item[data-priority="high"]::before   { background: var(--danger); }
-    .task-item[data-priority="medium"]::before{ background: var(--accent); }
-    .task-item[data-priority="low"]::before    { background: var(--primary); }
-
-    .task-item.completed {
-      opacity: .55;
-    }
-
-    .task-item.completed .task-text {
-      text-decoration: line-through;
-      color: var(--text-muted);
-    }
-
-    /* 拖拽时视觉反馈 */
-    .task-item.dragging {
-      opacity: .5;
-      box-shadow: var(--shadow-lg);
-      transform: scale(1.01);
-    }
-
-    .task-item.drag-over {
-      border: 2px dashed var(--primary);
-    }
-
-    /* 复选框 */
-    .checkbox {
-      position: relative;
-      width: 22px;
-      height: 22px;
-      flex-shrink: 0;
-      cursor: pointer;
-    }
-
-    .checkbox input { opacity: 0; width: 0; height: 0; position: absolute; }
-
-    .checkmark {
+    .banner-slide::before {
+      content: '';
       position: absolute;
-      inset: 0;
-      border: 2px solid var(--border);
-      border-radius: 6px;
+      right: 30px; top: -20px;
+      width: 80px; height: 80px;
+      background: rgba(255,255,255,.06);
+      border-radius: 50%;
+    }
+
+    .banner-content {
+      position: relative;
+      z-index: 1;
+      color: #fff;
+    }
+
+    .banner-tag {
+      display: inline-block;
+      background: rgba(255,255,255,.25);
+      backdrop-filter: blur(8px);
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .banner-title {
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1.3;
+      margin-bottom: 6px;
+    }
+
+    .banner-sub {
+      font-size: 12.5px;
+      opacity: .85;
+      margin-bottom: 12px;
+    }
+
+    .banner-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
       background: #fff;
+      color: var(--orange);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 2px 10px rgba(0,0,0,.15);
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+
+    .banner-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(0,0,0,.2);
+    }
+
+    .banner-btn svg { width: 12px; height: 12px; }
+
+    .banner-img {
+      position: absolute;
+      right: 10px;
+      bottom: -5px;
+      font-size: 70px;
+      opacity: .22;
+    }
+
+    /* 轮播指示器 */
+    .banner-dots {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(255,102,0,.25);
       transition: all var(--transition);
     }
 
-    .checkbox:hover .checkmark { border-color: var(--primary); }
-
-    .checkbox input:checked + .checkmark {
-      background: var(--primary);
-      border-color: var(--primary);
+    .dot.active {
+      width: 20px;
+      border-radius: 3px;
+      background: var(--orange);
     }
 
-    .checkmark::after {
-      content: '';
-      position: absolute;
-      left: 6px; top: 2px;
-      width: 6px; height: 11px;
-      border: 2px solid #fff;
-      border-top: none;
-      border-left: none;
-      transform: rotate(45deg) scale(0);
-      transition: transform var(--transition);
+    /* ── 分类网格 ── */
+    .category-section {
+      padding: 16px 16px 6px;
     }
 
-    .checkbox input:checked + .checkmark::after { transform: rotate(45deg) scale(1); }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
 
-    /* 任务文字区 */
-    .task-content { flex: 1; min-width: 0; }
-
-    .task-text {
-      font-size: 14.5px;
-      font-weight: 500;
+    .section-title {
+      font-size: 17px;
+      font-weight: 800;
       color: var(--text);
-      line-height: 1.4;
-      word-break: break-word;
-    }
-
-    .task-meta {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-top: 4px;
+      gap: 7px;
     }
 
-    .task-date {
+    .section-title .dot-orange {
+      width: 6px; height: 6px;
+      background: var(--orange);
+      border-radius: 50%;
+    }
+
+    .section-more {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .section-more svg { width: 12px; height: 12px; }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+    }
+
+    .cat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      padding: 8px 4px;
+      border-radius: var(--radius-sm);
+      transition: background var(--transition);
+      cursor: pointer;
+    }
+
+    .cat-item:hover { background: var(--orange-light); }
+    .cat-item:active { transform: scale(.95); }
+
+    .cat-icon {
+      width: 50px; height: 50px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      position: relative;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+
+    .cat-icon .cat-badge {
+      position: absolute;
+      top: -3px; right: -3px;
+      background: var(--orange);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 10px;
+      border: 1.5px solid #fff;
+    }
+
+    .cat-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text);
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    /* ── 优惠横幅 ── */
+    .promo-strip {
+      padding: 10px 16px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .promo-strip::-webkit-scrollbar { display: none; }
+
+    .promo-card {
+      flex-shrink: 0;
+      background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+      border: 1px solid #FFCC80;
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      width: 160px;
+      cursor: pointer;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+
+    .promo-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(255,152,0,.2);
+    }
+
+    .promo-tag {
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--orange);
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      margin-bottom: 3px;
+    }
+
+    .promo-text {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .promo-sub {
+      font-size: 10.5px;
+      color: var(--text-muted);
+    }
+
+    /* ── 推荐商家 ── */
+    .merchant-section {
+      padding: 10px 16px 100px;
+    }
+
+    .merchant-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 14px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 2px;
+    }
+
+    .merchant-tabs::-webkit-scrollbar { display: none; }
+
+    .tab-item {
+      flex-shrink: 0;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: #fff;
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+
+    .tab-item.active {
+      background: var(--orange);
+      color: #fff;
+      border-color: var(--orange);
+    }
+
+    .tab-item:not(.active):hover { border-color: var(--orange); color: var(--orange); }
+
+    .merchant-list { display: flex; flex-direction: column; gap: 12px; }
+
+    .merchant-card {
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--card-shadow);
+      overflow: hidden;
+      transition: box-shadow var(--transition), transform var(--transition);
+      cursor: pointer;
+      animation: slideUp .35s ease both;
+    }
+
+    .merchant-card:hover {
+      box-shadow: var(--card-shadow-hover);
+      transform: translateY(-2px);
+    }
+
+    .merchant-cover {
+      position: relative;
+      height: 130px;
+      overflow: hidden;
+    }
+
+    .merchant-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .cover-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,.5) 100%);
+    }
+
+    .merchant-tag-float {
+      position: absolute;
+      top: 10px; left: 10px;
+      background: linear-gradient(135deg, #FF4400, #FF6600);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 10px;
+      letter-spacing: .3px;
+    }
+
+    .delivery-badge {
+      position: absolute;
+      bottom: 8px; left: 10px;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .delivery-badge svg { width: 11px; height: 11px; }
+
+    .merchant-body { padding: 12px 14px; }
+
+    .merchant-name {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .merchant-name .verified {
+      color: var(--orange);
+    }
+
+    .merchant-name .verified svg { width: 14px; height: 14px; }
+
+    .merchant-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .rating {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--orange);
+    }
+
+    .rating svg { width: 13px; height: 13px; }
+
+    .rating-count {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .price-tag {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    .time-tag {
       font-size: 11.5px;
       color: var(--text-muted);
       display: flex;
@@ -347,522 +612,877 @@
       gap: 3px;
     }
 
-    .task-date svg { width: 11px; height: 11px; }
+    .time-tag svg { width: 11px; height: 11px; }
 
-    .task-date.overdue { color: var(--danger); }
+    .merchant-tags {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
 
-    .priority-badge {
-      font-size: 10px;
-      font-weight: 700;
+    .mtag {
+      font-size: 10.5px;
+      color: var(--orange-dark);
+      background: var(--orange-light);
       padding: 2px 8px;
-      border-radius: 10px;
-      text-transform: uppercase;
-      letter-spacing: .4px;
-    }
-
-    .priority-badge.high   { background: #fef2f2; color: var(--danger); }
-    .priority-badge.medium { background: #fffbeb; color: #b45309; }
-    .priority-badge.low    { background: var(--primary-light); color: var(--primary); }
-
-    /* 操作按钮 */
-    .task-actions { display: flex; gap: 4px; opacity: 0; transition: opacity var(--transition); }
-
-    .task-item:hover .task-actions { opacity: 1; }
-
-    .action-btn {
-      width: 30px; height: 30px;
-      border-radius: 8px;
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all var(--transition);
-      color: var(--text-muted);
-    }
-
-    .action-btn svg { width: 15px; height: 15px; }
-
-    .action-btn:hover { background: #f3f4f6; color: var(--text); }
-    .action-btn.delete:hover { background: var(--danger-light); color: var(--danger); }
-
-    /* ── 空状态 ── */
-    .empty-state {
-      text-align: center;
-      padding: 56px 24px;
-      color: var(--text-muted);
-    }
-
-    .empty-state svg {
-      width: 72px; height: 72px;
-      color: #d1d5db;
-      margin-bottom: 16px;
-    }
-
-    .empty-state h3 { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-    .empty-state p  { font-size: 14px; }
-
-    /* ── 清除完成按钮 ── */
-    .clear-done {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      width: 100%;
-      padding: 11px;
-      margin-top: 12px;
-      border-radius: var(--radius);
-      border: 1.5px dashed var(--border);
-      background: transparent;
-      font-size: 13px;
+      border-radius: 6px;
       font-weight: 600;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all var(--transition);
     }
 
-    .clear-done:hover {
-      border-color: var(--danger);
-      color: var(--danger);
-      background: var(--danger-light);
-    }
-
-    .clear-done svg { width: 14px; height: 14px; }
-
-    /* ── 动画 ── */
-    @keyframes fadeDown {
-      from { opacity: 0; transform: translateY(-16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateX(-12px); }
-      to   { opacity: 1; transform: translateX(0); }
-    }
-
-    @keyframes pop {
-      0%   { transform: scale(.92); opacity: 0; }
-      70%  { transform: scale(1.04); }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
-    .task-item.just-added { animation: pop .3s ease both; }
-
-    /* ── 进度条 ── */
-    .progress-wrap {
-      background: var(--surface);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 16px 20px;
-      margin-bottom: 16px;
-    }
-
-    .progress-header {
+    .merchant-footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
     }
 
-    .progress-header span {
-      font-size: 12px;
+    .shipping-info {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .shipping-info svg { width: 12px; height: 12px; }
+
+    .free-ship {
+      color: var(--orange);
+      font-weight: 700;
+    }
+
+    /* ── 底部导航 ── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: #fff;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 6px 0 calc(6px + var(--safe-bottom));
+      z-index: 200;
+      box-shadow: 0 -2px 16px rgba(0,0,0,.06);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 4px 16px;
+      text-decoration: none;
+      color: var(--text-muted);
+      transition: color var(--transition);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .nav-item svg { width: 22px; height: 22px; transition: transform var(--transition); }
+
+    .nav-item span {
+      font-size: 10px;
       font-weight: 600;
+    }
+
+    .nav-item.active { color: var(--orange); }
+
+    .nav-item.active svg { transform: scale(1.1); }
+
+    .nav-item .nav-badge {
+      position: absolute;
+      top: 1px; right: 10px;
+      background: var(--orange);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 800;
+      min-width: 16px;
+      height: 16px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+      border: 1.5px solid #fff;
+    }
+
+    /* ── 加载骨架 ── */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+      background-size: 200%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 8px;
+    }
+
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ── 动画 ── */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    /* ── 汉堡菜单（侧滑）── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 300;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition);
+    }
+
+    .overlay.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .side-menu {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 280px;
+      max-width: 80vw;
+      background: #fff;
+      z-index: 301;
+      transform: translateX(-100%);
+      transition: transform .35s cubic-bezier(.4,0,.2,1);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .side-menu.show { transform: translateX(0); }
+
+    .side-header {
+      background: linear-gradient(135deg, var(--orange), #FF8533);
+      padding: 40px 20px 24px;
+      color: #fff;
+    }
+
+    .side-avatar {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.25);
+      border: 3px solid rgba(255,255,255,.5);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .side-avatar svg { width: 28px; height: 28px; color: #fff; }
+
+    .side-name {
+      font-size: 17px;
+      font-weight: 800;
+      margin-bottom: 3px;
+    }
+
+    .side-phone {
+      font-size: 12.5px;
+      opacity: .75;
+    }
+
+    .side-links { padding: 12px 0; flex: 1; }
+
+    .side-link {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 20px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background var(--transition);
+      cursor: pointer;
+    }
+
+    .side-link:hover { background: var(--orange-light); color: var(--orange); }
+
+    .side-link svg { width: 18px; height: 18px; color: var(--text-muted); flex-shrink: 0; }
+    .side-link:hover svg { color: var(--orange); }
+
+    .side-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 20px;
+    }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(30,30,30,.88);
+      color: #fff;
+      padding: 10px 22px;
+      border-radius: 24px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 400;
+      opacity: 0;
+      pointer-events: none;
+      transition: all .3s ease;
+      white-space: nowrap;
+      backdrop-filter: blur(8px);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── 搜索页（隐藏）── */
+    .search-page {
+      position: fixed;
+      inset: 0;
+      background: #f5f5f5;
+      z-index: 250;
+      display: none;
+      flex-direction: column;
+      animation: fadeIn .25s ease;
+    }
+
+    .search-page.active { display: flex; }
+
+    .search-page-header {
+      background: #fff;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .search-page-header input {
+      flex: 1;
+      border: 1.5px solid var(--border);
+      border-radius: 24px;
+      padding: 9px 16px;
+      font-size: 14px;
+      outline: none;
+      font-family: inherit;
+      transition: border-color var(--transition);
+    }
+
+    .search-page-header input:focus { border-color: var(--orange); }
+
+    .search-cancel {
+      color: var(--orange);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+
+    .search-hints {
+      background: #fff;
+      padding: 14px 16px;
+    }
+
+    .search-hints h4 {
+      font-size: 12px;
+      font-weight: 700;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: .6px;
+      margin-bottom: 10px;
     }
 
-    .progress-header .progress-pct {
-      font-size: 14px;
-      font-weight: 800;
-      color: var(--primary);
+    .hint-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
-    .progress-track {
-      height: 6px;
-      background: var(--border);
-      border-radius: 10px;
-      overflow: hidden;
+    .hint-tag {
+      background: #f5f5f5;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      transition: all var(--transition);
     }
 
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--primary), #818cf8);
-      border-radius: 10px;
-      transition: width .5s cubic-bezier(.4,0,.2,1);
-    }
-
-    /* ── 响应式 ── */
-    @media (max-width: 480px) {
-      body { padding: 32px 12px 60px; }
-      .header h1 { font-size: 24px; }
-      .input-row { flex-wrap: wrap; }
-      .input-field input[type="date"] { width: 100%; }
-      .task-actions { opacity: 1; }
-      .task-meta { flex-wrap: wrap; }
+    .hint-tag:hover {
+      background: var(--orange-light);
+      color: var(--orange);
     }
   </style>
 </head>
 <body>
 
-  <!-- 标题 -->
-  <header class="header">
-    <div class="logo">
+  <!-- ── 顶部导航 ── -->
+  <header class="top-nav">
+    <div class="logo-area">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="var(--orange)" stroke="none">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-5l-4 2.5v-5l4 2.5V7.5l-5 3.5v1l5-1v5l4-2.5v-5l-5 1V7.5l5 3.5V17z"/>
+        </svg>
+      </div>
+      <span class="logo-text">食到家</span>
+    </div>
+    <div class="search-box" onclick="openSearch()">
+      <span class="search-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+             stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </span>
+      <input type="text" placeholder="搜索商家、美食…" readonly />
+    </div>
+    <div class="user-avatar" onclick="toggleMenu()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
            stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 11l3 3L22 4"/>
-        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
       </svg>
-      <h1>TaskFlow</h1>
     </div>
-    <p>专注当下，高效每一天</p>
   </header>
 
-  <main class="app">
-
-    <!-- 输入区 -->
-    <div class="input-card">
-      <div class="input-row">
-        <div class="input-field">
-          <label>新任务</label>
-          <input type="text" id="taskInput" placeholder="输入任务，回车添加…" maxlength="200" autocomplete="off" />
-        </div>
-        <div class="input-field" style="flex:0 0 160px;">
-          <label>截止日期</label>
-          <input type="date" id="dateInput" />
-        </div>
-        <button class="btn-add" id="addBtn" title="添加任务" aria-label="添加任务">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-               stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-        </button>
-      </div>
-      <div class="priority-group">
-        <span>优先级</span>
-        <button class="priority-btn active-low" data-priority="low">低</button>
-        <button class="priority-btn" data-priority="medium">中</button>
-        <button class="priority-btn" data-priority="high">高</button>
-      </div>
-    </div>
-
-    <!-- 进度条 -->
-    <div class="progress-wrap">
-      <div class="progress-header">
-        <span>今日进度</span>
-        <span class="progress-pct" id="progressPct">0%</span>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill" id="progressFill" style="width:0%"></div>
-      </div>
-    </div>
-
-    <!-- 筛选栏 -->
-    <div class="stats-bar">
-      <span class="count" id="countText">共 0 项任务</span>
-      <div class="filters">
-        <button class="filter-btn active" data-filter="all">全部</button>
-        <button class="filter-btn" data-filter="active">待完成</button>
-        <button class="filter-btn" data-filter="done">已完成</button>
-      </div>
-    </div>
-
-    <!-- 任务列表 -->
-    <div class="task-list" id="taskList" aria-live="polite" aria-label="任务列表"></div>
-
-    <!-- 空状态 -->
-    <div class="empty-state" id="emptyState" style="display:none;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+  <!-- ── 地址栏 ── -->
+  <div class="address-bar">
+    <div class="addr-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
            stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="3" width="18" height="18" rx="3"/>
-        <path d="M9 12l2 2 4-4"/>
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+        <circle cx="12" cy="10" r="3"/>
       </svg>
-      <h3>暂无任务</h3>
-      <p>添加你的第一个待办事项吧</p>
     </div>
-
-    <!-- 清除已完成 -->
-    <button class="clear-done" id="clearDoneBtn" style="display:none;">
+    <div class="address-text">
+      <strong>科技园A栋</strong> · 龙华区民治街道
+    </div>
+    <div class="weather-badge">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
            stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="3 6 5 6 21 6"/>
-        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-        <path d="M10 11v6M14 11v6"/>
+        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/>
+        <line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
       </svg>
-      清除已完成任务
-    </button>
+      28°C 晴
+    </div>
+  </div>
 
-  </main>
+  <!-- ── Banner 轮播 ── -->
+  <section class="banner-section">
+    <div class="banner-container">
+      <div class="banner-track" id="bannerTrack">
+        <div class="banner-slide">
+          <div class="banner-content">
+            <span class="banner-tag">限时特惠</span>
+            <div class="banner-title">新用户首单<br>立减 15 元</div>
+            <div class="banner-sub">首次下单即享优惠</div>
+            <span class="banner-btn">
+              立即领取
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </span>
+          </div>
+          <div class="banner-img">🍔</div>
+        </div>
+        <div class="banner-slide">
+          <div class="banner-content">
+            <span class="banner-tag">爆品推荐</span>
+            <div class="banner-title">网红小龙虾<br>限时 5 折起</div>
+            <div class="banner-sub">鲜活配送 · 当日达</div>
+            <span class="banner-btn">
+              去抢购
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </span>
+          </div>
+          <div class="banner-img">🦞</div>
+        </div>
+        <div class="banner-slide">
+          <div class="banner-content">
+            <span class="banner-tag">会员专享</span>
+            <div class="banner-title">Plus 会员<br>每月 3 张免运费券</div>
+            <div class="banner-sub">开通即享专属权益</div>
+            <span class="banner-btn">
+              了解更多
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </span>
+          </div>
+          <div class="banner-img">👑</div>
+        </div>
+      </div>
+    </div>
+    <div class="banner-dots" id="bannerDots"></div>
+  </section>
+
+  <!-- ── 分类网格 ── -->
+  <section class="category-section">
+    <div class="section-header">
+      <div class="section-title">
+        <span class="dot-orange"></span>
+        全部分类
+      </div>
+      <a href="#" class="section-more" onclick="showToast('更多分类即将上线')">
+        更多
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </a>
+    </div>
+    <div class="category-grid" id="categoryGrid"></div>
+  </section>
+
+  <!-- ── 优惠横幅 ── -->
+  <section style="padding: 0 16px 10px;">
+    <div class="promo-strip" id="promoStrip"></div>
+  </section>
+
+  <!-- ── 推荐商家 ── -->
+  <section class="merchant-section">
+    <div class="section-header">
+      <div class="section-title">
+        <span class="dot-orange"></span>
+        推荐商家
+      </div>
+      <a href="#" class="section-more" onclick="showToast('商家列表加载中…')">
+        查看全部
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </a>
+    </div>
+    <div class="merchant-tabs" id="merchantTabs"></div>
+    <div class="merchant-list" id="merchantList"></div>
+  </section>
+
+  <!-- ── 底部导航 ── -->
+  <nav class="bottom-nav">
+    <div class="nav-item active" onclick="switchTab(this, 'home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>首页</span>
+    </div>
+    <div class="nav-item" onclick="switchTab(this, 'sort')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+        <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+      </svg>
+      <span>分类</span>
+    </div>
+    <div class="nav-item" onclick="switchTab(this, 'find')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <span>发现</span>
+      <span class="nav-badge">NEW</span>
+    </div>
+    <div class="nav-item" onclick="switchTab(this, 'order')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+        <polyline points="10 9 9 9 8 9"/>
+      </svg>
+      <span>订单</span>
+    </div>
+    <div class="nav-item" onclick="switchTab(this, 'mine')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      <span>我的</span>
+    </div>
+  </nav>
+
+  <!-- ── 侧边菜单 ── -->
+  <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+  <div class="side-menu" id="sideMenu">
+    <div class="side-header">
+      <div class="side-avatar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+      <div class="side-name">美食爱好者</div>
+      <div class="side-phone">138****8888</div>
+    </div>
+    <div class="side-links">
+      <div class="side-link" onclick="showToast('会员中心即将开放')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        会员中心
+      </div>
+      <div class="side-link" onclick="showToast('优惠券已加载')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+          <line x1="7" y1="7" x2="7.01" y2="7"/>
+        </svg>
+        我的优惠券
+        <span style="margin-left:auto;background:var(--orange);color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;">3张</span>
+      </div>
+      <div class="side-link" onclick="showToast('地址管理已加载')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+        收货地址
+      </div>
+      <div class="side-divider"></div>
+      <div class="side-link" onclick="showToast('客服 400-888-9999')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+        </svg>
+        客服中心
+      </div>
+      <div class="side-link" onclick="showToast('感谢您的支持！')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        帮助与反馈
+      </div>
+      <div class="side-divider"></div>
+      <div class="side-link" onclick="showToast('设置页面加载中…')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        设置
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 搜索页 ── -->
+  <div class="search-page" id="searchPage">
+    <div class="search-page-header">
+      <input type="text" id="searchInput" placeholder="搜索商家、美食…" autofocus />
+      <span class="search-cancel" onclick="closeSearch()">取消</span>
+    </div>
+    <div class="search-hints">
+      <h4>热门搜索</h4>
+      <div class="hint-tags">
+        <span class="hint-tag" onclick="doSearch('小龙虾')">小龙虾</span>
+        <span class="hint-tag" onclick="doSearch('炸鸡')">炸鸡</span>
+        <span class="hint-tag" onclick="doSearch('披萨')">披萨</span>
+        <span class="hint-tag" onclick="doSearch('奶茶')">奶茶</span>
+        <span class="hint-tag" onclick="doSearch('烧烤')">烧烤</span>
+        <span class="hint-tag" onclick="doSearch('寿司')">寿司</span>
+        <span class="hint-tag" onclick="doSearch('火锅')">火锅</span>
+        <span class="hint-tag" onclick="doSearch('轻食沙拉')">轻食沙拉</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Toast ── -->
+  <div class="toast" id="toast"></div>
 
   <script>
-    /* ── 数据层 ── */
-    let tasks = JSON.parse(localStorage.getItem('taskflow_tasks') || '[]');
-    let currentFilter = 'all';
-    let selectedPriority = 'low';
-    let dragSrc = null;
+    /* ── 数据 ── */
+    const categories = [
+      { icon: '🍔', label: '美食', color: '#FFF3E0', badge: '' },
+      { icon: '🛒', label: '超市', color: '#E8F5E9', badge: '' },
+      { icon: '💊', label: '药品', color: '#E3F2FD', badge: '急' },
+      { icon: '🌸', label: '鲜花', color: '#FCE4EC', badge: '' },
+      { icon: '🍰', label: '甜点', color: '#FFF8E1', badge: '' },
+      { icon: '🥗', label: '轻食', color: '#E8F5E9', badge: '' },
+      { icon: '🍱', label: '便当', color: '#FBE9E7', badge: '' },
+      { icon: '☕', label: '饮品', color: '#EDE7F6', badge: '' },
+      { icon: '🍜', label: '面馆', color: '#FFF3E0', badge: '' },
+      { icon: '🍕', label: '披萨', color: '#FFEBEE', badge: 'NEW' },
+    ];
 
-    function save() {
-      localStorage.setItem('taskflow_tasks', JSON.stringify(tasks));
-    }
+    const promotions = [
+      { tag: '限时满减', text: '满39减10', sub: '午市特惠 11:00-13:00' },
+      { tag: '新客专享', text: '首单立减15元', sub: '新用户首次下单' },
+      { tag: '会员专享', text: 'Plus 会员 0 配送费', sub: '每月3张免运费券' },
+      { tag: '爆品秒杀', text: '人气炸鸡 ¥9.9', sub: '每日10点准时开抢' },
+    ];
 
-    /* ── 工具 ── */
-    function uid() {
-      return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-    }
+    const merchantTabs = ['综合排序', '距离最近', '销量最高', '评分最高', '起送价低'];
 
-    function formatDate(d) {
-      if (!d) return '';
-      const [y, m, day] = d.split('-');
-      const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-      return `${parseInt(m)}月${parseInt(day)}日`;
-    }
+    const merchants = [
+      {
+        name: '老街坊川菜馆', verified: true,
+        rating: 4.9, votes: 3256,
+        price: '¥20', time: '28分钟', distance: '1.2km',
+        tags: ['川菜', '辣', '招牌毛血旺'],
+        ship: '免配送费', cover: '#FF6622',
+        emoji: '🌶️', discount: '满39减8', flag: '人气'
+      },
+      {
+        name: '必胜客宅急送', verified: true,
+        rating: 4.8, votes: 8921,
+        price: '¥0', time: '35分钟', distance: '2.1km',
+        tags: ['披萨', '意面', '牛排'],
+        ship: '免配送费', cover: '#E53935',
+        emoji: '🍕', discount: '满59减12', flag: '连锁'
+      },
+      {
+        name: '喜茶 GO', verified: false,
+        rating: 4.7, votes: 5603,
+        price: '¥0', time: '22分钟', distance: '0.8km',
+        tags: ['奶茶', '果茶', '新品'],
+        ship: '免配送费', cover: '#43A047',
+        emoji: '🧋', discount: '新品第二杯半价', flag: ''
+      },
+      {
+        name: '汉堡王皇堡店', verified: true,
+        rating: 4.6, votes: 4102,
+        price: '¥20', time: '30分钟', distance: '1.5km',
+        tags: ['汉堡', '炸鸡', '薯条'],
+        ship: '配送费¥3', cover: '#F57C00',
+        emoji: '🍔', discount: '满49减10', flag: ''
+      },
+      {
+        name: '鲍师傅糕点', verified: true,
+        rating: 4.9, votes: 12038,
+        price: '¥30', time: '40分钟', distance: '3.2km',
+        tags: ['糕点', '肉松贝贝', '泡芙'],
+        ship: '免配送费', cover: '#F06292',
+        emoji: '🍰', discount: '满60减15', flag: '网红'
+      },
+    ];
 
-    function isOverdue(dateStr) {
-      if (!dateStr) return false;
-      const today = new Date();
-      today.setHours(0,0,0,0);
-      return new Date(dateStr) < today;
-    }
+    /* ── Banner 轮播 ── */
+    let currentSlide = 0;
+    const totalSlides = 3;
 
-    /* ── 优先级按钮 ── */
-    document.querySelectorAll('.priority-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.priority-btn').forEach(b => {
-          b.className = 'priority-btn';
-          b.classList.remove(`active-${b.dataset.priority}`);
-        });
-        btn.classList.add(`active-${btn.dataset.priority}`);
-        selectedPriority = btn.dataset.priority;
-      });
-    });
-
-    /* ── 筛选按钮 ── */
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentFilter = btn.dataset.filter;
-        render();
-      });
-    });
-
-    /* ── 添加任务 ── */
-    const taskInput = document.getElementById('taskInput');
-    const dateInput = document.getElementById('dateInput');
-
-    // 设置默认日期为今天
-    const today = new Date();
-    dateInput.value = today.toISOString().slice(0, 10);
-    dateInput.min = today.toISOString().slice(0, 10);
-
-    function addTask() {
-      const text = taskInput.value.trim();
-      if (!text) { taskInput.focus(); return; }
-
-      tasks.unshift({
-        id: uid(),
-        text,
-        date: dateInput.value,
-        priority: selectedPriority,
-        done: false,
-        createdAt: new Date().toISOString()
-      });
-
-      save();
-      taskInput.value = '';
-      render();
-
-      // 重置优先级为低
-      document.querySelectorAll('.priority-btn').forEach(b => {
-        b.className = 'priority-btn';
-        if (b.dataset.priority === 'low') b.classList.add('active-low');
-      });
-      selectedPriority = 'low';
-    }
-
-    document.getElementById('addBtn').addEventListener('click', addTask);
-    taskInput.addEventListener('keydown', e => { if (e.key === 'Enter') addTask(); });
-
-    /* ── 切换完成 ── */
-    function toggleTask(id) {
-      const task = tasks.find(t => t.id === id);
-      if (!task) return;
-      task.done = !task.done;
-      save();
-      render();
-    }
-
-    /* ── 删除任务 ── */
-    function deleteTask(id) {
-      tasks = tasks.filter(t => t.id !== id);
-      save();
-      render();
-    }
-
-    /* ── 编辑任务 ── */
-    function editTask(id) {
-      const task = tasks.find(t => t.id === id);
-      if (!task) return;
-      const newText = prompt('编辑任务:', task.text);
-      if (newText !== null && newText.trim()) {
-        task.text = newText.trim();
-        save();
-        render();
+    function buildDots() {
+      const dotsEl = document.getElementById('bannerDots');
+      for (let i = 0; i < totalSlides; i++) {
+        const d = document.createElement('div');
+        d.className = 'dot' + (i === 0 ? ' active' : '');
+        d.onclick = () => goToSlide(i);
+        dotsEl.appendChild(d);
       }
     }
 
-    /* ── 清除已完成 ── */
-    document.getElementById('clearDoneBtn').addEventListener('click', () => {
-      tasks = tasks.filter(t => !t.done);
-      save();
-      render();
-    });
+    function goToSlide(n) {
+      currentSlide = n;
+      const track = document.getElementById('bannerTrack');
+      track.style.transform = `translateX(-${n * 100}%)`;
+      document.querySelectorAll('.dot').forEach((d, i) => {
+        d.className = 'dot' + (i === n ? ' active' : '');
+      });
+    }
 
-    /* ── 渲染 ── */
-    function render() {
-      const list = document.getElementById('taskList');
-      const empty = document.getElementById('emptyState');
-      const clearBtn = document.getElementById('clearDoneBtn');
-      const progressPct = document.getElementById('progressPct');
-      const progressFill = document.getElementById('progressFill');
-      const countText = document.getElementById('countText');
+    function startAutoPlay() {
+      setInterval(() => {
+        goToSlide((currentSlide + 1) % totalSlides);
+      }, 3500);
+    }
 
-      let filtered = tasks;
-      if (currentFilter === 'active') filtered = tasks.filter(t => !t.done);
-      if (currentFilter === 'done')   filtered = tasks.filter(t =>  t.done);
+    /* ── 分类网格 ── */
+    function buildCategories() {
+      const grid = document.getElementById('categoryGrid');
+      grid.innerHTML = categories.map(cat => `
+        <div class="cat-item" onclick="showToast('正在打开「${cat.label}」分类…')">
+          <div class="cat-icon" style="background:${cat.icon === '🍔' ? '#FFF3E0' : cat.color}">
+            ${cat.icon}
+            ${cat.badge ? `<span class="cat-badge">${cat.badge}</span>` : ''}
+          </div>
+          <span class="cat-label">${cat.label}</span>
+        </div>
+      `).join('');
+    }
 
-      // 统计
-      const total = tasks.length;
-      const done  = tasks.filter(t => t.done).length;
-      const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+    /* ── 优惠横幅 ── */
+    function buildPromos() {
+      const strip = document.getElementById('promoStrip');
+      strip.innerHTML = promotions.map(p => `
+        <div class="promo-card" onclick="showToast('优惠已领取 ✓')">
+          <div class="promo-tag">${p.tag}</div>
+          <div class="promo-text">${p.text}</div>
+          <div class="promo-sub">${p.sub}</div>
+        </div>
+      `).join('');
+    }
 
-      progressPct.textContent = total === 0 ? '0%' : `${pct}%`;
-      progressFill.style.width = `${pct}%`;
-      countText.textContent = `共 ${total} 项任务 · ${done} 已完成`;
+    /* ── 商家选项卡 ── */
+    function buildTabs() {
+      const tabs = document.getElementById('merchantTabs');
+      tabs.innerHTML = merchantTabs.map((t, i) => `
+        <div class="tab-item${i === 0 ? ' active' : ''}" onclick="selectTab(this)">${t}</div>
+      `).join('');
+    }
 
-      // 空状态
-      if (filtered.length === 0) {
-        list.innerHTML = '';
-        empty.style.display = 'block';
-        clearBtn.style.display = 'none';
-        return;
-      }
-      empty.style.display = 'none';
-      clearBtn.style.display = done > 0 ? 'flex' : 'none';
+    function selectTab(el) {
+      el.parentElement.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      showToast(`按「${el.textContent}」排序`);
+    }
 
-      // 渲染任务
-      list.innerHTML = filtered.map((task, i) => `
-        <div class="task-item${task.done ? ' completed' : ''}"
-             data-id="${task.id}"
-             data-priority="${task.priority}"
-             draggable="true">
-          <label class="checkbox">
-            <input type="checkbox" ${task.done ? 'checked' : ''}
-                   onchange="toggleTask('${task.id}')" aria-label="标记完成" />
-            <span class="checkmark"></span>
-          </label>
-          <div class="task-content">
-            <div class="task-text">${escHtml(task.text)}</div>
-            <div class="task-meta">
-              ${task.date ? `
-                <span class="task-date${task.done ? '' : isOverdue(task.date) ? ' overdue' : ''}">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                       stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                    <line x1="16" y1="2" x2="16" y2="6"/>
-                    <line x1="8" y1="2" x2="8" y2="6"/>
-                    <line x1="3" y1="10" x2="21" y2="10"/>
-                  </svg>
-                  ${formatDate(task.date)}${!task.done && isOverdue(task.date) ? ' · 已过期' : ''}
-                </span>` : ''}
-              <span class="priority-badge ${task.priority}">
-                ${task.priority === 'high' ? '高' : task.priority === 'medium' ? '中' : '低'}
-              </span>
+    /* ── 商家列表 ── */
+    function buildMerchants() {
+      const list = document.getElementById('merchantList');
+      list.innerHTML = merchants.map((m, i) => `
+        <div class="merchant-card" style="animation-delay:${i * .08}s"
+             onclick="showToast('正在进入「${m.name}」…')">
+          <div class="merchant-cover">
+            <div style="width:100%;height:100%;background:${m.cover};display:flex;
+                        align-items:center;justify-content:center;font-size:64px;
+                        position:absolute;inset:0;">
+              ${m.emoji}
+            </div>
+            <div class="cover-overlay"></div>
+            ${m.flag ? `<div class="merchant-tag-float">${m.flag}</div>` : ''}
+            <div class="delivery-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              ${m.time}
             </div>
           </div>
-          <div class="task-actions">
-            <button class="action-btn" onclick="editTask('${task.id}')" title="编辑" aria-label="编辑任务">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                   stroke-linecap="round" stroke-linejoin="round">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-            </button>
-            <button class="action-btn delete" onclick="deleteTask('${task.id}')" title="删除" aria-label="删除任务">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                   stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6"/>
-                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                <path d="M10 11v6M14 11v6"/>
-                <path d="M9 6V4h6v2"/>
-              </svg>
-            </button>
+          <div class="merchant-body">
+            <div class="merchant-name">
+              ${m.name}
+              ${m.verified ? `<span class="verified">
+                <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+              </span>` : ''}
+            </div>
+            <div class="merchant-meta">
+              <span class="rating">
+                <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+                ${m.rating}
+              </span>
+              <span class="rating-count">(${m.votes.toLocaleString()})</span>
+              <span class="time-tag">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                ${m.distance}
+              </span>
+            </div>
+            <div class="merchant-footer">
+              <div class="shipping-info">
+                ${m.ship === '免配送费'
+                  ? `<span class="free-ship">${m.ship}</span>`
+                  : m.ship}
+                <span style="margin:0 4px;color:var(--border)">|</span>
+                <span>人均 ${m.price}</span>
+              </div>
+              <div style="display:flex;gap:5px;align-items:center;">
+                <span style="font-size:10px;background:#FFF3E0;color:var(--orange-dark);
+                             padding:2px 7px;border-radius:8px;font-weight:700;">
+                  ${m.discount}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       `).join('');
-
-      // 拖拽事件
-      attachDragEvents();
     }
 
-    function escHtml(s) {
-      const div = document.createElement('div');
-      div.textContent = s;
-      return div.innerHTML;
+    /* ── 底部导航 ── */
+    function switchTab(el, tab) {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      el.classList.add('active');
+      const names = { home: '首页', sort: '分类', find: '发现', order: '订单', mine: '我的' };
+      if (tab !== 'home') showToast(`${names[tab]}模块即将开放`);
     }
 
-    /* ── 拖拽排序 ── */
-    function attachDragEvents() {
-      document.querySelectorAll('.task-item').forEach(item => {
-        item.addEventListener('dragstart', e => {
-          dragSrc = item;
-          item.classList.add('dragging');
-          e.dataTransfer.effectAllowed = 'move';
-        });
+    /* ── 侧边菜单 ── */
+    function toggleMenu() {
+      const menu = document.getElementById('sideMenu');
+      const overlay = document.getElementById('overlay');
+      menu.classList.toggle('show');
+      overlay.classList.toggle('show');
+    }
 
-        item.addEventListener('dragend', () => {
-          item.classList.remove('dragging');
-          document.querySelectorAll('.task-item').forEach(el => el.classList.remove('drag-over'));
-        });
+    /* ── 搜索页 ── */
+    function openSearch() {
+      document.getElementById('searchPage').classList.add('active');
+      setTimeout(() => document.getElementById('searchInput').focus(), 50);
+    }
 
-        item.addEventListener('dragover', e => {
-          e.preventDefault();
-          e.dataTransfer.dropEffect = 'move';
-          if (item !== dragSrc) item.classList.add('drag-over');
-        });
+    function closeSearch() {
+      document.getElementById('searchPage').classList.remove('active');
+    }
 
-        item.addEventListener('dragleave', () => {
-          item.classList.remove('drag-over');
-        });
+    function doSearch(q) {
+      document.getElementById('searchInput').value = q;
+      showToast(`正在搜索「${q}」…`);
+    }
 
-        item.addEventListener('drop', e => {
-          e.preventDefault();
-          item.classList.remove('drag-over');
-          if (!dragSrc || item === dragSrc) return;
+    document.getElementById('searchInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        const q = e.target.value.trim();
+        if (q) showToast(`正在搜索「${q}」…`);
+      }
+    });
 
-          const allItems = [...document.querySelectorAll('.task-item')];
-          const fromId = dragSrc.dataset.id;
-          const toId   = item.dataset.id;
-
-          const fromIdx = tasks.findIndex(t => t.id === fromId);
-          const toIdx   = tasks.findIndex(t => t.id === toId);
-
-          const [moved] = tasks.splice(fromIdx, 1);
-          tasks.splice(toIdx, 0, moved);
-          save();
-          render();
-        });
-      });
+    /* ── Toast ── */
+    let toastTimer = null;
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
     }
 
     /* ── 启动 ── */
-    render();
+    buildDots();
+    startAutoPlay();
+    buildCategories();
+    buildPromos();
+    buildTabs();
+    buildMerchants();
   </script>
 </body>
 </html>
